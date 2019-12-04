@@ -60,6 +60,14 @@ function getECmd(language, fname, iname) {
      }
 }
 
+function deleteFiles(filename, inputFile) {
+     fs.unlink(`./project/src/${filename}`, err => console.log(err));
+     fs.unlink(`./project/bin/${filename.split(".")[0]}`, err =>
+          console.log(err)
+     );
+     fs.unlink(`./project/IO/${inputFile}`, err => console.log(err));
+}
+
 async function compileCode(filename, inputFile, language) {
      let docker = new DockerMananger();
      const name = await docker.createContainer();
@@ -70,14 +78,7 @@ async function compileCode(filename, inputFile, language) {
      console.log("compilation result", resp);
      if (resp !== "") {
           docker.removeContainer();
-          fs.unlink(`./project/src/${filename}`, err => {
-               console.log(err);
-          });
-          fs.unlink(`./project/bin/${filename.split(".")[0]}`, err =>
-               console.log(err)
-          );
-          fs.unlink(`./project/IO/${inputFile}`, err => console.log(err));
-
+          deleteFiles(filename, inputFile);
           return {
                type: "Compilation error",
                error: resp
@@ -86,11 +87,7 @@ async function compileCode(filename, inputFile, language) {
           // Check for infinite loops!
           resp = await docker.execute(execCmd);
           docker.removeContainer();
-          fs.unlink(`./project/src/${filename}`, err => console.log(err));
-          fs.unlink(`./project/bin/${filename.split(".")[0]}`, err =>
-               console.log(err)
-          );
-          fs.unlink(`./project/IO/${inputFile}`, err => console.log(err));
+          deleteFiles(filename, inputFile);
           return {
                type: "Execution Result",
                output: resp
