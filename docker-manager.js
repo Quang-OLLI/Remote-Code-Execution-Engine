@@ -21,7 +21,8 @@ module.exports = class DockerManager {
                Tty: true,
                OpenStdin: false,
                AttachStdin: true,
-               WorkingDir: "/"
+               WorkingDir: "/",
+               StopTimeout: 7
           });
           await this.container.start();
           return this.containerName;
@@ -45,6 +46,15 @@ module.exports = class DockerManager {
                     stream.on("end", () => resolve(message));
                });
           });
+     }
+
+     stop() {
+          return this.container.stop({ t: 10 });
+     }
+
+     async inspect() {
+          const data = await this.container.inspect();
+          return data;
      }
 
      removeContainer() {

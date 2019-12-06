@@ -75,7 +75,6 @@ async function compileCode(filename, inputFile, language) {
      let compileCmd = getCCmd(language, filename);
      let execCmd = getECmd(language, filename, inputFile);
      let resp = await docker.execute(compileCmd);
-     console.log("compilation result", resp);
      if (resp !== "") {
           docker.removeContainer();
           deleteFiles(filename, inputFile);
@@ -85,6 +84,7 @@ async function compileCode(filename, inputFile, language) {
           };
      } else {
           // Check for infinite loops!
+          // docker.stop();
           resp = await docker.execute(execCmd);
           docker.removeContainer();
           deleteFiles(filename, inputFile);
@@ -98,14 +98,35 @@ async function compileCode(filename, inputFile, language) {
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-app.post("/:language", upload, async (req, res, next) => {
-     const output = await compileCode(
-          req.sourceFile,
-          req.inputFile,
-          req.params.language
-     );
-     console.log("Output", output);
-     res.json({ filename: req.sourceFile, input: req.inputFile, output });
+app.post("/:language", async (req, res) => {
+     req.sourceFile = uuid.new() + `.${req.params.language}`;
+     req.inputFile = uuid.new() + ".in";
+
+     fs.writeFile(`./project/src/${req.sourceFile}`, req.body.code, err => {
+          if (err) {
+               res.json({ error: err });
+          }
+          fs.writeFile(
+               `./project/IO/${req.inputFile}`,
+               req.body.input,
+               async err => {
+                    if (err) {
+                         res.json({ error: err });
+                    }
+                    console.log("Starting to compile....");
+                    const output = await compileCode(
+                         req.sourceFile,
+                         req.inputFile,
+                         req.params.language
+                    );
+                    res.json({
+                         filename: req.sourceFile,
+                         input: req.inputFile,
+                         output
+                    });
+               }
+          );
+     });
 });
 
-app.listen(4000, () => console.log("Listening on port 3000!"));
+app.listen(5000, () => console.log("Listening on port 5     000!"));
