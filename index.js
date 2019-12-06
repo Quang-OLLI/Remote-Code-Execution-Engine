@@ -61,11 +61,21 @@ function getECmd(language, fname, iname) {
 }
 
 function deleteFiles(filename, inputFile) {
-     fs.unlink(`./project/src/${filename}`, err => console.log(err));
-     fs.unlink(`./project/bin/${filename.split(".")[0]}`, err =>
-          console.log(err)
-     );
-     fs.unlink(`./project/IO/${inputFile}`, err => console.log(err));
+     fs.unlink(`./project/src/${filename}`, err => {
+          if (err) {
+               console.log(err);
+          }
+     });
+     fs.unlink(`./project/bin/${filename.split(".")[0]}`, err => {
+          if (err) {
+               console.log(err);
+          }
+     });
+     fs.unlink(`./project/IO/${inputFile}`, err => {
+          if (err) {
+               console.log(err);
+          }
+     });
 }
 
 async function compileCode(filename, inputFile, language) {

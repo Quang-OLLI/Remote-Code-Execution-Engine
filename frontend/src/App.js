@@ -4,16 +4,21 @@ import AceEditor from "react-ace";
 import { Select, Row, Col, Input } from "antd";
 import "ace-builds/src-noconflict/mode-c_cpp";
 import "ace-builds/src-noconflict/theme-monokai";
+import axios from "axios";
 
 const { Option } = Select;
 const { TextArea } = Input;
 
-class App extends React.Component {
-     constructor(props) {
-          super(props);
-          this.state = {
-               lang: "c",
-               code: `#include<bits/stdc++.h>
+const cTemplate = `#include<stdio.h>
+                                   
+int main() {
+               
+     // Enter your code here
+                                     
+     return 0;
+}`;
+
+const cppTemplate = `#include<bits/stdc++.h>
                            
 using namespace std;
                                    
@@ -22,21 +27,67 @@ int main() {
      // Enter your code here
                                      
      return 0;
-}`,
+}`;
+
+class App extends React.Component {
+     constructor(props) {
+          super(props);
+          this.state = {
+               lang: "cpp",
+               code: cppTemplate,
                input: "",
-               output: ""
+               output: "",
+               btnState: false
           };
           this.handleChange = value => {
-               console.log(value);
+               this.setState({
+                    code: value
+               });
           };
           this.selectLanguage = lang => {
-               this.setState({
-                    code: lang
-               });
+               if (lang === "c") {
+                    this.setState({
+                         lang: lang,
+                         code: cTemplate
+                    });
+               } else {
+                    this.setState({
+                         lang,
+                         code: cppTemplate
+                    });
+               }
           };
           this.handleIOChange = e => {
                this.setState({
-                    [e.target.name]: e.target.value
+                    input: e.target.value
+               });
+          };
+          this.submitCode = e => {
+               console.log("Submitting...");
+               this.setState({
+                    btnState: true
+               });
+               const data = {
+                    code: this.state.code,
+                    input: this.state.input
+               };
+               axios.post(`/${this.state.lang}`, data).then(op => {
+                    console.log(op.data);
+                    // this.setState({
+                    //      output: op.data.output.output,
+                    //      btnState: false
+                    // });
+                    if (op.data.output.type === "Compilation error") {
+                         this.setState({
+                              output: op.data.output.error,
+                              btnState: false
+                         });
+                    } else {
+                         this.setState({
+                              output: op.data.output.output,
+                              btnState: false
+                         });
+                    }
                });
           };
      }
@@ -47,12 +98,12 @@ int main() {
                          <Col sm={24} md={12}>
                               <h1>Code Executor!</h1>
                               <Select
-                                   defaultValue="C"
+                                   defaultValue={this.state.lang}
                                    style={{ width: 150 }}
                                    onChange={this.selectLanguage}
                               >
-                                   <Option value="C">C</Option>
-                                   <Option value="C++">C++</Option>
+                                   <Option value="c">C</Option>
+                                   <Option value="cpp">C++</Option>
                               </Select>
                               <br />
                               <br />
@@ -86,7 +137,12 @@ int main() {
                                    name="input"
                                    onChange={this.handleIOChange}
                               />
-                              <button>Compile and Run</button>
+                              <button
+                                   onClick={this.submitCode}
+                                   disabled={this.state.btnState}
+                              >
+                                   Compile and Run
+                              </button>
                               <h3>Output</h3>
                               <TextArea
                                    rows={5}
