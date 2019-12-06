@@ -29,3 +29,19 @@ body {
      margin: 10px 0;
      cursor: pointer;
 }
+
+.right-pane button:disabled {
+     background-color: #cacaca;
+}
+
+nav {
+     text-align: center;
+}
+
+p {
+     font-size: 1.5em;
+     float: right;
+     margin: 0 20px;
+     color: purple;
+     font-weight: bolder;
+}

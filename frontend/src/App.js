@@ -5,6 +5,7 @@ import { Select, Row, Col, Input } from "antd";
 import "ace-builds/src-noconflict/mode-c_cpp";
 import "ace-builds/src-noconflict/theme-monokai";
 import axios from "axios";
+import logo from "./assets/logo.png";
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -72,19 +73,14 @@ class App extends React.Component {
                     input: this.state.input
                };
                axios.post(`/${this.state.lang}`, data).then(op => {
-                    console.log(op.data);
-                    // this.setState({
-                    //      output: op.data.output.output,
-                    //      btnState: false
-                    // });
-                    if (op.data.output.type === "Compilation error") {
+                    if (op.data.error === "NIL") {
                          this.setState({
-                              output: op.data.output.error,
+                              output: op.data.output,
                               btnState: false
                          });
                     } else {
                          this.setState({
-                              output: op.data.output.output,
+                              output: op.data.error,
                               btnState: false
                          });
                     }
@@ -94,12 +90,18 @@ class App extends React.Component {
      render() {
           return (
                <div className="App">
+                    <nav>
+                         <h1>
+                              <img src={logo} width="70px" />
+                              Safe Exec{" "}
+                         </h1>
+                    </nav>
+                    <p>Let your code execute in Stealth Mode!</p>
                     <Row>
                          <Col sm={24} md={12}>
-                              <h1>Code Executor!</h1>
                               <Select
                                    defaultValue={this.state.lang}
-                                   style={{ width: 150 }}
+                                   style={{ width: 150, marginLeft: "20px" }}
                                    onChange={this.selectLanguage}
                               >
                                    <Option value="c">C</Option>

@@ -48,8 +48,8 @@ module.exports = class DockerManager {
           });
      }
 
-     stop() {
-          return this.container.stop({ t: 10 });
+     async stop() {
+          return await this.container.kill();
      }
 
      async inspect() {
